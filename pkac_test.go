@@ -36,7 +36,7 @@ var spkacRSABase64 = `MIICRTCCAS0wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDK/2
 func TestParseSPKAC(t *testing.T) {
 	derBytes, _ := base64.StdEncoding.DecodeString(spkacRSABase64)
 	if _, err := ParseSPKAC(derBytes); err != nil {
-		t.Error("failed to parse SPKAC: %s", err)
+		t.Errorf("failed to parse SPKAC: %s", err)
 	}
 }
 
@@ -45,19 +45,19 @@ func TestCreateCertificateFromSPKAC(t *testing.T) {
 	parentDerBytes, _ := hex.DecodeString(certificateHex)
 	parent, err := x509.ParseCertificates(parentDerBytes)
 	if err != nil {
-		t.Error("failed to parse builtin certificate: %s", err)
+		t.Errorf("failed to parse builtin certificate: %s", err)
 	}
 
 	privateKeyDerBytes, _ := hex.DecodeString(privateKeyHex)
 	private, err := x509.ParsePKCS1PrivateKey(privateKeyDerBytes)
 	if err != nil {
-		t.Error("failed to parse builtin private key: %s", err)
+		t.Errorf("failed to parse builtin private key: %s", err)
 	}
 
 	spkacDerBytes, _ := base64.StdEncoding.DecodeString(spkacRSABase64)
 	public, err := ParseSPKAC(spkacDerBytes)
 	if err != nil {
-		t.Error("failed to parse SPKAC: %s", err)
+		t.Errorf("failed to parse SPKAC: %s", err)
 	}
 
 	notBefore := time.Now()
@@ -78,12 +78,12 @@ func TestCreateCertificateFromSPKAC(t *testing.T) {
 	}
 	certDerBytes, err := x509.CreateCertificate(rand.Reader, template, parent[0], public, private)
 	if err != nil {
-		t.Error("failed to create certificate: %s", err)
+		t.Errorf("failed to create certificate: %s", err)
 	}
 
 	certOut, err := os.Create(path.Join("test", "42.pem"))
 	if err != nil {
-		t.Error("failed to open test/test.pem for writing: %s", err)
+		t.Errorf("failed to open test/test.pem for writing: %s", err)
 	}
 	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: certDerBytes})
 	certOut.Close()
