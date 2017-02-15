@@ -89,3 +89,30 @@ func TestCreateCertificateFromSPKAC(t *testing.T) {
 	certOut.Close()
 
 }
+
+// An SPKAC that can be validated by go (its signatures are made with
+// SHA256 digests; acquired from the google verified access API):
+var spkacRSASHA256Base64 = `MIICgDCCAWgwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCTfSu8d7y5riNS6ri+gyfOOPLsp5YAP7iC9FfHdLPAjFVc9mLbHHDgcU+/17oSEcYCoGYZBsJTkA3Urx53Rkg6XCvLySxfctG6hhp7P4uAfKhydvnE0A2Bem9x8/WCjgRsBn5MhilxPgV3iARIQM48RtG8V1+L8kKUZ3p2z77famE+BMP2j0iU2dzPuoJod8wzfvQhzu++AtCDYFrVnztBXLEIRgQ/jIngcIiPsWWJ7dtXY0GQIF+3JIbb1F9nz+BV5d2LhRKiY0JWyrsgZSiGNtzbEWNQdwhYfxy85LXJYB4AMgJm1yHKQeS/rLbVgcwcCmAMRSI5g3UPRqXK1VkBAgMBAAEWQDMzQTAwRjFGMTBFODhFMUYzMkVBMjY2OTQ5NDUyMTM2NzdFQTA1OTVFNTVDNjAxMEUwMTBGMUQ0QzIzREM0QTQwDQYJKoZIhvcNAQELBQADggEBAEHs5Rc3SZLIAKXphiU3ZtBhoD7xbgD4Z/hdAsMxb3RxmoA6uX3I9LIRDXVf1Q28gDBhZeVwFq3cjqauE5d9tFfp4WzS+RE5eB5v9nHxYU6srhKoqwZA+2k7ykkptFJYsmsP1V0ipi+4znMszu7s75YWlzjeLJJjazM6xsQd3aIE+1jzNOzBPOFHSj6N1689rz7JeFvZU+DTOabz6uWfZBfoLgMTNzedSU/MwmxImwiz1ciuHI1QdNVFqgEAvTSd74/TCqPFS9r36QMEPPikjtA3GmLnRKSrarJDKm88oJPF23JkAxIU7jasTYVHTJfINcL48DGPGhNbzVIdMbU37uw=`
+
+// An SPKAC that has been tampered with:
+var failingSpkacRSASHA256Base64 = `MIICgDCCAWgwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCTfSu8d7y5riNS6ri+gyfOOPLsp5YAP7iC9FfHdLPAjFVc9mLbHHDgcU+/17oSEcYCoGYZBsJTkA3Urx53Rkg6XCvLySxfctG6hhp7P4uAfKhydvnE0A2Bem9x8/WCjgRsBn5MhilxPgV3iARIQM48RtG8V1+L8kKUZ3p2z77famE+BMP2j0iU2dzPuoJod8wzfvQhzu++AtCDYFrVnztBXLEIRgQ/jIngcIiPsWWJ7dtXY0GQIF+3JIbb1F9nz+BV5d2LhRKiY0JWyrsgZSiGNtzbEWNQdwhYfxy85LXJYB4AMgJm1yHKQeS/rLbVgcwcCmAMRSI5g3UPRqXK1VkBAgMBAAEWQDMzQTAwRjFGMTBFODhFMUYzMkVBMjY2OTQ5NDUyMTM2NzdFQTA1OTVFNTVDNjAyMEUwMTBGMUQ0QzIzREM0QTQwDQYJKoZIhvcNAQELBQADggEBAEHs5Rc3SZLIAKXphiU3ZtBhoD7xbgD4Z/hdAsMxb3RxmoA6uX3I9LIRDXVf1Q28gDBhZeVwFq3cjqauE5d9tFfp4WzS+RE5eB5v9nHxYU6srhKoqwZA+2k7ykkptFJYsmsP1V0ipi+4znMszu7s75YWlzjeLJJjazM6xsQd3aIE+1jzNOzBPOFHSj6N1689rz7JeFvZU+DTOabz6uWfZBfoLgMTNzedSU/MwmxImwiz1ciuHI1QdNVFqgEAvTSd74/TCqPFS9r36QMEPPikjtA3GmLnRKSrarJDKm88oJPF23JkAxIU7jasTYVHTJfINcL48DGPGhNbzVIdMbU37uw=`
+
+func TestValidateSPKAC(t *testing.T) {
+	derBytes, _ := base64.StdEncoding.DecodeString(spkacRSASHA256Base64)
+	if _, err := ParseSPKAC(derBytes); err != nil {
+		t.Errorf("Couldn't even parse the SPKAC: %s", err)
+	}
+	if _, err := ValidateSPKAC(derBytes); err != nil {
+		t.Errorf("SPKAC didn't validate: %s", err)
+	}
+}
+
+func TestFailingSPKACValidation(t *testing.T) {
+	derBytes, _ := base64.StdEncoding.DecodeString(failingSpkacRSASHA256Base64)
+	if _, err := ParseSPKAC(derBytes); err != nil {
+		t.Errorf("Couldn't even parse the SPKAC: %s", err)
+	}
+	if pub, err := ValidateSPKAC(derBytes); err == nil {
+		t.Errorf("The SPKAC validated though it should not have: %v", pub)
+	}
+}

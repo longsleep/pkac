@@ -32,8 +32,7 @@ type spkacInfo struct {
 	Signature asn1.BitString
 }
 
-func ParseSPKAC(derBytes []byte) (pub crypto.PublicKey, err error) {
-
+func parseSpkac(derBytes []byte, validate bool) (pub crypto.PublicKey, err error) {
 	var info spkacInfo
 	if _, err = asn1.Unmarshal(derBytes, &info); err != nil {
 		return
@@ -49,6 +48,32 @@ func ParseSPKAC(derBytes []byte) (pub crypto.PublicKey, err error) {
 		return
 	}
 
-	return
+	sigAlgo := getSignatureDetailsFromOID(info.Algorithm.Algorithm)
+	if sigAlgo == x509.UnknownSignatureAlgorithm {
+		return nil, errors.New("x509: unknown signature algorithm")
+	}
 
+	if !validate {
+		return
+	}
+	err = validateSignature(sigAlgo, pub, info.Pkac.Raw, info.Signature.Bytes)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// Parse a BER-encoded SPKAC and return the public key from it without
+// validating a signature.
+//
+// This function is provided for compatibility with PKAC blobs using
+// message digests that are known to be broken (e.g. RSA with MD2).
+func ParseSPKAC(derBytes []byte) (crypto.PublicKey, error) {
+	return parseSpkac(derBytes, false)
+}
+
+// Parse a BER-encoded SPKAC and return the public key from it,
+// validating a signature to ensure integrity.
+func ValidateSPKAC(derBytes []byte) (pub crypto.PublicKey, err error) {
+	return parseSpkac(derBytes, true)
 }
