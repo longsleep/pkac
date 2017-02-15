@@ -12,6 +12,7 @@
 package pkac
 
 import (
+	"crypto"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
@@ -31,7 +32,7 @@ type spkacInfo struct {
 	Signature asn1.BitString
 }
 
-func ParseSPKAC(derBytes []byte) (pub interface{}, err error) {
+func ParseSPKAC(derBytes []byte) (pub crypto.PublicKey, err error) {
 
 	var info spkacInfo
 	if _, err = asn1.Unmarshal(derBytes, &info); err != nil {

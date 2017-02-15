@@ -5,6 +5,7 @@
 package pkac
 
 import (
+	"crypto"
 	"crypto/dsa"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -69,7 +70,7 @@ func namedCurveFromOID(oid asn1.ObjectIdentifier) elliptic.Curve {
 	return nil
 }
 
-func parsePublicKey(algo x509.PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{}, error) {
+func parsePublicKey(algo x509.PublicKeyAlgorithm, keyData *publicKeyInfo) (crypto.PublicKey, error) {
 	asn1Data := keyData.PublicKey.RightAlign()
 	switch algo {
 	case x509.RSA:
