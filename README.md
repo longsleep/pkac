@@ -1,4 +1,4 @@
-# pkac [![GoDoc](https://godoc.org/github.com/longsleep/pkac?status.svg)](https://godoc.org/github.com/longsleep/pkac)
+# pkac [![Build Status](https://travis-ci.org/longsleep/pkac.svg)](https://travis-ci.org/longsleep/pkac)  [![GoDoc](https://godoc.org/github.com/longsleep/pkac?status.svg)](https://godoc.org/github.com/longsleep/pkac)
 
 Pkac implements Go support for SPKAC/PKAC data as produced by the html [&lt;keygen&gt;](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/keygen) element.
 
