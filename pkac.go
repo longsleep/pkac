@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package implements support for SPKAC/PKAC data as produced by the html
+// Package pkac implements support for SPKAC/PKAC data as produced by the html
 // <keygen> element (Signed Public Key And Challenge).
 //
 // References:
 // - https://web.archive.org/web/20070401073244/http://wp.netscape.com/eng/security/comm4-keygen.html
-// - https://www.openssl.org/docs/apps/spkac.html
+// - https://wiki.openssl.org/index.php/Manual:Spkac(1)
 // - http://lists.whatwg.org/pipermail/whatwg-whatwg.org/attachments/20080714/07ea5534/attachment.txt
 package pkac
 
@@ -63,7 +63,7 @@ func parseSpkac(derBytes []byte, validate bool) (pub crypto.PublicKey, err error
 	return
 }
 
-// Parse a BER-encoded SPKAC and return the public key from it without
+// ParseSPKAC parses a BER-encoded SPKAC and return the public key from it without
 // validating a signature.
 //
 // This function is provided for compatibility with PKAC blobs using
@@ -72,7 +72,7 @@ func ParseSPKAC(derBytes []byte) (crypto.PublicKey, error) {
 	return parseSpkac(derBytes, false)
 }
 
-// Parse a BER-encoded SPKAC and return the public key from it,
+// ValidateSPKAC parses a BER-encoded SPKAC and return the public key from it,
 // validating a signature to ensure integrity.
 func ValidateSPKAC(derBytes []byte) (pub crypto.PublicKey, err error) {
 	return parseSpkac(derBytes, true)
